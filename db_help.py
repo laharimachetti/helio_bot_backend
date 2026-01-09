@@ -12,6 +12,9 @@ def get_db():
     )
 
 def fetch_cutoffs_all_years(branch, rank, limit=20):
+    if rank is None or not branch:
+        return []
+    
     db = get_db()
     cur = db.cursor()
 
@@ -27,6 +30,8 @@ def fetch_cutoffs_all_years(branch, rank, limit=20):
 
     cur.execute(query, (f"%{branch}%", rank, limit))
     results = cur.fetchall()
+    
+    cur.close()
     db.close()
 
     return results

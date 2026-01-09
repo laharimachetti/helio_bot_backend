@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request # type: ignore
+from fastapi import FastAPI # type: ignore
 from recommendation_helper import get_recommendations
 from formatter import format_response
 from pydantic import BaseModel # type: ignore
@@ -57,7 +57,7 @@ def extract_branch_from_text(text: str):
 # INTENT HELPERS
 # =====================================================
 def is_greeting(text: str):
-    return text.strip().lower() in ["hi", "hello", "hey", "hii", "hai", "HI", "hola"]
+    return text.strip().lower() in ["hi", "hello", "hey", "hii", "hai", "hola"]
 
 def wants_restart(text: str):
     t = text.lower()
@@ -199,6 +199,12 @@ async def dialogflow_webhook(payload: WebhookRequest):
     # -------------------------------------------------
     # GET RECOMMENDATIONS
     # -------------------------------------------------
+    if state["rank"] is None or state["branch"] is None:
+        return {
+            "fulfillmentText":
+            "Please tell me your rank and preferred branch."
+        }
+
     try:
         results = get_recommendations(state["rank"], state["branch"])
         response = format_response(results, state["rank"], state["branch"])

@@ -26,10 +26,8 @@ def get_recommendations(rank, branch):
     branch: str (required)
     """
 
-    if not branch:
+    if rank is None or not branch:
         return []
 
     normalized_branch = normalize_branch(branch)
-
-    # ✅ CORRECT ORDER: (branch, rank)
     return fetch_cutoffs_all_years(normalized_branch, rank)
