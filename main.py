@@ -86,12 +86,12 @@ def wants_new_branch(text: str):
 def is_exit(text: str):
     t = text.lower()
     return any(p in t for p in [
-        "bye", "bye bye", "goodbye", "ok bye", "tata"
+        "bye", "bye bye", "goodbye", "ok bye", "tata", "that's it"
     ])
 
 def is_acknowledgement(text: str):
     return text.strip().lower() in [
-        "ok", "okay", "fine", "cool", "thankyou", "Thankyou"
+        "ok", "okay", "fine", "cool", "thankyou", "Thankyou",
         "thanks", "thank you", "thx"
     ]
 
@@ -102,7 +102,7 @@ def is_acknowledgement(text: str):
 @app.post("/webhook")
 async def dialogflow_webhook(payload: WebhookRequest):
     
-    session = payload.session
+    session = payload.session or "default"
     text = payload.message.strip()
 
     # INIT SESSION
@@ -190,15 +190,24 @@ async def dialogflow_webhook(payload: WebhookRequest):
     # -------------------------------------------------
     # CACHE (SESSION SAFE)
     # -------------------------------------------------
-    cache_key = f"{session}_{state['rank']}_{state['branch'].lower()}"
+    branch_key = state["branch"].lower() if state["branch"] else "unknown"
+    cache_key = f"{session}_{state['rank']}_{branch_key}"
+
     if cache_key in response_cache:
         return response_cache[cache_key]
 
     # -------------------------------------------------
     # GET RECOMMENDATIONS
     # -------------------------------------------------
-    results = get_recommendations(state["rank"], state["branch"])
-    response = format_response(results, state["rank"], state["branch"])
+    try:
+        results = get_recommendations(state["rank"], state["branch"])
+        response = format_response(results, state["rank"], state["branch"])
+    except Exception:
+        return {
+            "fulfillmentText":
+            "Sorry, something went wrong while fetching recommendations.\n"
+            "Please try again or restart."
+        }
 
     response_cache[cache_key] = response
     return response
