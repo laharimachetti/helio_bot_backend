@@ -100,7 +100,7 @@ def is_acknowledgement(text: str):
 # WEBHOOK
 # =====================================================
 @app.post("/webhook")
-async def webhook(payload: WebhookRequest):
+async def dialogflow_webhook(payload: WebhookRequest):
     
     session = payload.session
     text = payload.message.strip()
