@@ -163,16 +163,9 @@ async def webhook(payload: WebhookRequest):
     # EXTRACT RANK
     # -------------------------------------------------
     if state["rank"] is None:
-        rank = None
         match = re.search(r"\b\d{4,6}\b", text)
         if match:
-            rank = match.group()
-
-    if rank:
-        try:
-            state["rank"] = int(rank)
-        except:
-            pass
+            state["rank"] = int(match.group())
 
     if state["rank"] is None:
         return {
