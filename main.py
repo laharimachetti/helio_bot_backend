@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request # type: ignore
 from recommendation_helper import get_recommendations
 from formatter import format_response
-from pydantic import BaseModel
+from pydantic import BaseModel # type: ignore
 from typing import Optional
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
 import re
 
 app = FastAPI()
@@ -167,11 +167,11 @@ async def dialogflow_webhook(payload: WebhookRequest):
         if match:
             state["rank"] = int(match.group())
 
-    if state["rank"] is None:
-        return {
-            "fulfillmentText":
-            "Sure 🙂 To suggest suitable colleges, please tell me your rank."
-        }
+        else:
+            return {
+                "fulfillmentText":
+                "Sure 🙂 To suggest suitable colleges, please tell me your rank."
+            }
 
     # -------------------------------------------------
     # EXTRACT BRANCH
