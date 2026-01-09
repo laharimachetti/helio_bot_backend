@@ -208,7 +208,9 @@ async def dialogflow_webhook(payload: WebhookRequest):
     try:
         results = get_recommendations(state["rank"], state["branch"])
         response = format_response(results, state["rank"], state["branch"])
-    except Exception:
+    
+    except Exception as e:
+        print("RECOMMENDATION ERROR:", e)
         return {
             "fulfillmentText":
             "Sorry, something went wrong while fetching recommendations.\n"
