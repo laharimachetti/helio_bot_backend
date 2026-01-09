@@ -103,7 +103,7 @@ def is_acknowledgement(text: str):
 async def dialogflow_webhook(payload: WebhookRequest):
     
     session = payload.session or "default"
-    text = payload.message.strip()
+    text = (payload.message or "").strip()
 
     # INIT SESSION
     if session not in user_state:
@@ -165,7 +165,7 @@ async def dialogflow_webhook(payload: WebhookRequest):
     if state["rank"] is None:
         match = re.search(r"\b\d{4,6}\b", text)
         if match:
-            state["rank"] = int(match.group())
+            state["rank"] = int(match.group(1))
 
         else:
             return {

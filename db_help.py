@@ -1,4 +1,4 @@
-import pymysql
+import pymysql # type: ignore
 import os
 
 def get_db():
