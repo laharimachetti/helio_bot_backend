@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from recommendation_helper import get_recommendations
 from formatter import format_response
+from pydantic import BaseModel
+from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 import re
 
@@ -22,6 +24,13 @@ app.add_middleware(
 # =====================================================
 user_state = {}        # session -> {rank, branch}
 response_cache = {}   # session_rank_branch -> response
+
+# =========================
+# REQUEST MODEL (THIS IS THE KEY FIX)
+# =========================
+class WebhookRequest(BaseModel):
+    session: Optional[str] = "default"
+    message: str
 
 
 # =====================================================
@@ -48,7 +57,7 @@ def extract_branch_from_text(text: str):
 # INTENT HELPERS
 # =====================================================
 def is_greeting(text: str):
-    return text.strip().lower() in ["hi", "hello", "hey", "hii", "hai"]
+    return text.strip().lower() in ["hi", "hello", "hey", "hii", "hai", "HI", "hola"]
 
 def wants_restart(text: str):
     t = text.lower()
@@ -69,19 +78,20 @@ def wants_new_branch(text: str):
         "check another branch",
         "another branch",
         "change branch",
-        "different branch"
+        "different branch",
+        "other branch"
     ])
 
 
 def is_exit(text: str):
     t = text.lower()
     return any(p in t for p in [
-        "bye", "bye bye", "goodbye"
+        "bye", "bye bye", "goodbye", "ok bye", "tata"
     ])
 
 def is_acknowledgement(text: str):
     return text.strip().lower() in [
-        "ok", "okay", "fine", "cool",
+        "ok", "okay", "fine", "cool", "thankyou", "Thankyou"
         "thanks", "thank you", "thx"
     ]
 
@@ -90,13 +100,10 @@ def is_acknowledgement(text: str):
 # WEBHOOK
 # =====================================================
 @app.post("/webhook")
-async def dialogflow_webhook(request: Request):
-    data = await request.json()
-
-    session = data.get("session", "default")
-    text = data.get("message", "")
-    params = {}
-
+async def webhook(payload: WebhookRequest):
+    
+    session = payload.session
+    text = payload.message.strip()
 
     # INIT SESSION
     if session not in user_state:
@@ -155,8 +162,8 @@ async def dialogflow_webhook(request: Request):
     # -------------------------------------------------
     # EXTRACT RANK
     # -------------------------------------------------
-    rank = params.get("rank")
-    if not rank:
+    if state["rank"] is None:
+        rank = None
         match = re.search(r"\b\d{4,6}\b", text)
         if match:
             rank = match.group()
@@ -176,20 +183,16 @@ async def dialogflow_webhook(request: Request):
     # -------------------------------------------------
     # EXTRACT BRANCH
     # -------------------------------------------------
-    branch = params.get("branch")
-    if branch and isinstance(branch, str) and branch.lower() != "required":
-        state["branch"] = branch.strip()
-    else:
-        extracted = extract_branch_from_text(text)
-        if extracted:
-            state["branch"] = extracted
-
     if state["branch"] is None:
-        return {
-            "fulfillmentText":
-            f"Got it 👍 Your rank is {state['rank']}.\n"
-            "Do you have a preferred branch? (CSE, ECE, IT, etc.)"
-        }
+        branch = extract_branch_from_text(text)
+        if branch:
+            state["branch"] = branch
+        else:
+            return {
+                "fulfillmentText":
+                f"Got it 👍 Your rank is {state['rank']}.\n"
+                "Do you have a preferred branch? (CSE, ECE, IT, etc.)"
+            }
 
     # -------------------------------------------------
     # CACHE (SESSION SAFE)
