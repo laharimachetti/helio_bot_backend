@@ -165,7 +165,7 @@ async def dialogflow_webhook(payload: WebhookRequest):
     if state["rank"] is None:
         match = re.search(r"\b(\d{4,6})\b", text)
         if match:
-            state["rank"] = int(match.group(1))
+            state["rank"] = int(match.group(1).strip())
 
         else:
             return {

@@ -29,5 +29,6 @@ def get_recommendations(rank, branch):
     if rank is None or not branch:
         return []
 
-    normalized_branch = normalize_branch(branch)
+    clean_branch = branch.strip()
+    normalized_branch = normalize_branch(clean_branch)
     return fetch_cutoffs_all_years(normalized_branch, rank)

@@ -3,11 +3,11 @@ import os
 
 def get_db():
     return pymysql.connect(
-        host=os.environ.get("MYSQLHOST"),
-        user=os.environ.get("MYSQLUSER"),
-        password=os.environ.get("MYSQLPASSWORD"),
-        database=os.environ.get("MYSQLDATABASE"),
-        port=int(os.environ.get("MYSQLPORT", 3306)),
+        host=os.environ.get("MYSQLHOST", "").strip(),
+        user=os.environ.get("MYSQLUSER", "").strip(),
+        password=os.environ.get("MYSQLPASSWORD", "").strip(),
+        database=os.environ.get("MYSQLDATABASE", "").strip(),
+        port=os.environ.get("MYSQLPORT", "3306").strip(),
         cursorclass=pymysql.cursors.DictCursor
     )
 
