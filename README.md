@@ -30,6 +30,3 @@ The project is built as a **real-world, deployed system**, focusing on backend r
 🔗 https://heliobot.netlify.app/
 
 ---
-
-b.com/laharimachetti/helio_bot_backend
-cd helio_bot_backend
