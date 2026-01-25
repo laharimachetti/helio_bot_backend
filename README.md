@@ -31,7 +31,7 @@ The project is built as a **real-world, deployed system**, focusing on backend r
 
 
 ---
-## Feontend Code link
+## Frontend Code 
 
 🔗 https://github.com/laharimachetti/helio-bot-frontend 
 
